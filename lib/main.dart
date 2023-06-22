@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:qr_maker/views/qr_generator.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,11 +11,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'QR Scanner'),
     );
   }
 }
@@ -37,10 +37,27 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: QrImageView(
-          data: 'Bivek Karki',
-          version: QrVersions.auto,
-          size: 200.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const QRGenerator()));
+              },
+              child: const Text(
+                "Generate QR",
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              child: const Text(
+                "Scan QR",
+              ),
+            )
+          ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
