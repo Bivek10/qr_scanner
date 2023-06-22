@@ -1,4 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class QRGenerator extends StatefulWidget {
@@ -11,6 +14,7 @@ class QRGenerator extends StatefulWidget {
 class _QRGeneratorState extends State<QRGenerator> {
   TextEditingController qrTxtCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  GlobalKey _screenShotKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -73,10 +77,13 @@ class _QRGeneratorState extends State<QRGenerator> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                QrImageView(
-                  data: qrTxtCtrl.text,
-                  version: QrVersions.auto,
-                  size: 200.0,
+                RepaintBoundary(
+                  key: _screenShotKey,
+                  child: QrImageView(
+                    data: qrTxtCtrl.text,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                  ),
                 ),
                 const SizedBox(
                   height: 25,
@@ -85,7 +92,9 @@ class _QRGeneratorState extends State<QRGenerator> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        saveImageToGallery();
+                      },
                       child: const Text(
                         "Download QR",
                       ),
@@ -107,5 +116,37 @@ class _QRGeneratorState extends State<QRGenerator> {
             ),
           );
         });
+  }
+
+  Future<Uint8List?> toQrImageData() async {
+    print(qrTxtCtrl);
+    try {
+      final image = await QrPainter(
+        data: qrTxtCtrl.text,
+        version: QrVersions.auto,
+        gapless: false,
+      ).toImage(300);
+      final a = await image.toByteData(format: ImageByteFormat.png);
+      return a!.buffer.asUint8List();
+    } catch (e) {
+      print(
+        "error::: $e",
+      );
+      return null;
+    }
+  }
+
+  Future<void> saveImageToGallery() async {
+    try {
+      Uint8List? imageBytes = await toQrImageData();
+      if (imageBytes != null) {
+        await ImageGallerySaver.saveImage(imageBytes);
+        print('Image saved to gallery successfully');
+      } else {
+        print('Failed to capture the widget');
+      }
+    } catch (e) {
+      print('Error saving image to gallery: $e');
+    }
   }
 }
