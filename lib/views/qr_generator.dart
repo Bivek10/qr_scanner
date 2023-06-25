@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+import '../utils/theme/colors.dart';
+
 class QRGenerator extends StatefulWidget {
   const QRGenerator({super.key});
 
@@ -20,7 +22,16 @@ class _QRGeneratorState extends State<QRGenerator> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("Generate QR"),
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.chevron_left,
+                size: 20,
+                color: AppColors.blackColor,
+              )),
+          title: Text('Generate QR'),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -93,7 +104,7 @@ class _QRGeneratorState extends State<QRGenerator> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        saveImageToGallery();
+                        toQrImageData();
                       },
                       child: const Text(
                         "Download QR",
@@ -119,15 +130,19 @@ class _QRGeneratorState extends State<QRGenerator> {
   }
 
   Future<Uint8List?> toQrImageData() async {
-    print(qrTxtCtrl);
+    print("qrTxtCtrl:::::::, ${qrTxtCtrl.text}");
     try {
       final image = await QrPainter(
         data: qrTxtCtrl.text,
         version: QrVersions.auto,
         gapless: false,
+        errorCorrectionLevel: 1,
       ).toImage(300);
       final a = await image.toByteData(format: ImageByteFormat.png);
-      return a!.buffer.asUint8List();
+      print(a!.buffer.asUint8List());
+      final result = await ImageGallerySaver.saveImage(a!.buffer.asUint8List());
+      print("results:::$result");
+      return a.buffer.asUint8List();
     } catch (e) {
       print(
         "error::: $e",
