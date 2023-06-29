@@ -4,8 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qr_maker/utils/theme/theme.dart';
 import 'package:qr_maker/views/home.dart';
 
-import 'package:qr_maker/views/qr_scanner_home.dart';
-
 void main() {
   runApp(const MyApp());
 }

@@ -23,6 +23,9 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 
 flutter:
+  assets:
+    - assets/images/qr_image.png
+
   fonts:
     - family: Exo2
       fonts:

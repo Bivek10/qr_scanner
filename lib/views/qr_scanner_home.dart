@@ -1,10 +1,8 @@
-import 'dart:developer';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:qr_maker/views/qr_generator.dart';
+import 'package:qr_maker/views/qr_result.dart';
 import '../utils/theme/colors.dart';
 
 class QRScannerHome extends StatefulWidget {
@@ -38,6 +36,23 @@ class _QRScannerHomeState extends State<QRScannerHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.blueLight,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.chevron_left,
+            size: 25,
+            color: AppColors.backgroundColor2,
+          ),
+        ),
+        title: const Text(
+          "Scanned QR",
+          style: TextStyle(color: AppColors.backgroundColor2, fontSize: 16),
+        ),
+      ),
       body: Container(
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(gradient: AppColors.gradient2),
@@ -84,7 +99,11 @@ class _QRScannerHomeState extends State<QRScannerHome> {
   void navigateToNextScreen(String qrData) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => QRGenerator()),
+      MaterialPageRoute(
+        builder: (context) => QRResult(
+          scanData: qrData,
+        ),
+      ),
     );
   }
 }

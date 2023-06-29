@@ -1,6 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -22,56 +25,83 @@ class _QRGeneratorState extends State<QRGenerator> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: AppColors.blueLight,
           leading: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(
-                Icons.chevron_left,
-                size: 20,
-                color: AppColors.blackColor,
-              )),
-          title: Text('Generate QR'),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.chevron_left,
+              size: 25,
+              color: AppColors.backgroundColor2,
+            ),
+          ),
+          title: const Text(
+            "Generate QR",
+            style: TextStyle(color: AppColors.backgroundColor2, fontSize: 16),
+          ),
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Form(
             key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: qrTxtCtrl,
-                  decoration: InputDecoration(
-                    fillColor: Colors.grey.shade300,
-                    filled: true,
-                    hintText: "Enter QR code",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                      borderSide: const BorderSide(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 60),
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: qrTxtCtrl,
+                    decoration: InputDecoration(
+                      fillColor: AppColors.blueLight.withOpacity(0.2),
+                      filled: true,
+                      hintText: "Enter QR code",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50.0),
+                        borderSide: const BorderSide(),
+                      ),
                     ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return "Please enter qr code";
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value!.isEmpty) {
-                      return "Please enter qr code";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      FocusScope.of(context).unfocus();
+
                       _settingModalBottomSheet(context);
-                    }
-                  },
-                  child: const Text(
-                    "Generate QR",
-                  ),
-                ),
-              ],
+                    },
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          AppColors.errorColor),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: const BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.qr_code,
+                          size: 24.sp,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        const Text("Generate QR"),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ));
@@ -90,10 +120,14 @@ class _QRGeneratorState extends State<QRGenerator> {
               children: [
                 RepaintBoundary(
                   key: _screenShotKey,
-                  child: QrImageView(
-                    data: qrTxtCtrl.text,
-                    version: QrVersions.auto,
-                    size: 200.0,
+                  child: Container(
+                    color: AppColors.backgroundColor2,
+                    child: QrImageView(
+                      data: qrTxtCtrl.text,
+                      version: QrVersions.auto,
+                      size: 200.0,
+                      backgroundColor: Colors.white,
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -104,23 +138,50 @@ class _QRGeneratorState extends State<QRGenerator> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                        toQrImageData();
+                        saveImageToGallery();
                       },
-                      child: const Text(
-                        "Download QR",
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            AppColors.blueLight),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: const BorderSide(color: AppColors.errorColor),
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.qr_code,
+                            size: 24.sp,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          const Text("Save"),
+                        ],
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        _settingModalBottomSheet(context);
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            AppColors.errorColor),
+                        shape:
+                            MaterialStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18.0),
+                            side: const BorderSide(color: Colors.black),
+                          ),
+                        ),
                       ),
-                      child: const Text(
-                        "Cancel",
-                      ),
-                    ),
+                      child: const Text("Cancel"),
+                    )
                   ],
                 )
               ],
@@ -129,39 +190,49 @@ class _QRGeneratorState extends State<QRGenerator> {
         });
   }
 
-  Future<Uint8List?> toQrImageData() async {
-    print("qrTxtCtrl:::::::, ${qrTxtCtrl.text}");
+  Future<Uint8List?> captureQR() async {
     try {
-      final image = await QrPainter(
-        data: qrTxtCtrl.text,
-        version: QrVersions.auto,
-        gapless: false,
-        errorCorrectionLevel: 1,
-      ).toImage(300);
-      final a = await image.toByteData(format: ImageByteFormat.png);
-      print(a!.buffer.asUint8List());
-      final result = await ImageGallerySaver.saveImage(a!.buffer.asUint8List());
-      print("results:::$result");
-      return a.buffer.asUint8List();
+      RenderRepaintBoundary boundary = _screenShotKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      var image = await boundary.toImage();
+      ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+      Uint8List qrBytes = byteData!.buffer.asUint8List();
+      return qrBytes;
     } catch (e) {
-      print(
-        "error::: $e",
-      );
+      print(e.toString());
       return null;
     }
   }
 
   Future<void> saveImageToGallery() async {
     try {
-      Uint8List? imageBytes = await toQrImageData();
+      Uint8List? imageBytes = await captureQR();
       if (imageBytes != null) {
-        await ImageGallerySaver.saveImage(imageBytes);
-        print('Image saved to gallery successfully');
-      } else {
-        print('Failed to capture the widget');
+        var data = await ImageGallerySaver.saveImage(imageBytes);
+        if (data["isSuccess"] == true) {
+          if (mounted) {
+            Navigator.pop(context);
+            showSnackbar(context);
+          }
+        }
       }
     } catch (e) {
       print('Error saving image to gallery: $e');
     }
+  }
+
+  void showSnackbar(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.green,
+        content: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Text(
+            'QR imaged saved',
+            style: TextStyle(color: AppColors.backgroundColor2),
+          ),
+        ),
+      ),
+    );
   }
 }
